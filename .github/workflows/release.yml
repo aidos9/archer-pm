@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    - uses: actions/checkout@v3
     - name: Extract Version Name
       run: |
         versionName=`perl -ne 'print "$&" if /(?<=version\s=\s\").*(?=\"\n)/' < Cargo.toml`
