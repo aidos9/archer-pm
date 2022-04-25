@@ -3,7 +3,7 @@ name: Build Release
 on:
   release:
     types:
-      - create
+      - publish
 
 env:
   CARGO_TERM_COLOR: always
