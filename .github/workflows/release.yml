@@ -17,7 +17,7 @@ jobs:
       run: |
         version=`perl -ne 'print "$&" if /(?<=version\s=\s\").*(?=\"\n)/' < Cargo.toml`
         versionName="v$version"
-        releaseName = "Release - $version"
+        releaseName="Release - $version"
         export VERSION=$version
         export VERSION_NAME=$versionName
         export RELEASE_NAME=$releaseName
