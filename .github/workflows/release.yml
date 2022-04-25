@@ -16,20 +16,19 @@ jobs:
     - name: Extract Version Name
       run: |
         versionName=`perl -ne 'print "$&" if /(?<=version\s=\s\").*(?=\"\n)/' < Cargo.toml`
-        echo "::Determined version name="
-        echo $versionName
-  build_windows:
-    runs-on: windows-latest
+        echo "Determined version name=$versionName"
+#   build_windows:
+#     runs-on: windows-latest
     
-    steps:
-    - uses: actions/checkout@v3
-    - name: Build
-      run: cargo build --verbose --release
+#     steps:
+#     - uses: actions/checkout@v3
+#     - name: Build
+#       run: cargo build --verbose --release
     
-  build_linux:
-    runs-on: ubuntu-latest
+#   build_linux:
+#     runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v3
-    - name: Build
-      run: cargo build --verbose --release
+#     steps:
+#     - uses: actions/checkout@v3
+#     - name: Build
+#       run: cargo build --verbose --release
