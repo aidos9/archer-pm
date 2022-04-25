@@ -17,13 +17,17 @@ jobs:
       run: |
         version=`perl -ne 'print "$&" if /(?<=version\s=\s\").*(?=\"\n)/' < Cargo.toml`
         versionName="v$version"
+        releaseName = "Release - $version"
+        export VERSION=$version
+        export VERSION_NAME=$versionName
+        export RELEASE_NAME=$releaseName
         echo "Determined version name=$versionName"
     - uses: ncipollo/release-action@v1
       with:
         body: "See CHANGELOG.md for latest release notes"
         commit: main
-        tag: $versionName
-        name: "Release - $version"
+        tag: ${{ env.versionName }}
+        name: ${{ env.releaseName }}
         token: ${{ secrets.GITHUB_TOKEN }}
 #   build_windows:
 #     runs-on: windows-latest
