@@ -1,4 +1,4 @@
-name: test_main
+name: Test Main Branch
 
 on:
   push:
