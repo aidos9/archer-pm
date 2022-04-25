@@ -7,7 +7,7 @@ use zip::{ZipArchive, ZipWriter};
 
 const HIDDEN_FILE_PATH: &'static str = "/hidden";
 
-pub fn remove_checksum(path: &str) -> Result<(Vec<u8>, bool), APMError> {
+pub fn remove_checksum_zip(path: &str) -> Result<(Vec<u8>, bool), APMError> {
     let mut archive = read_archive(path)?;
     let options = zip::write::FileOptions::default();
 
@@ -63,19 +63,27 @@ fn read_archive(path: &str) -> Result<ZipArchive<File>, APMError> {
         .map_err(|e| APMErrorType::ZIPArchiveOpenError.into_apm_error(e.to_string()))?);
 }
 
-pub fn insert_checksum_zip(path: &str) -> Result<(Vec<u8>, String), APMError> {
+pub fn insert_checksum_zip(
+    path: &str,
+    remove_checksum: bool,
+) -> Result<(Vec<u8>, String), APMError> {
     let options = zip::write::FileOptions::default();
+    let mut contents;
 
-    let mut f = OpenOptions::new()
-        .read(true)
-        .write(false)
-        .open(path)
-        .map_err(|e| APMErrorType::FileOpenError.into_apm_error(e.to_string()))?;
+    if remove_checksum {
+        (contents, _) = remove_checksum_zip(path)?;
+    } else {
+        contents = Vec::new();
 
-    let mut contents = Vec::new();
+        let mut f = OpenOptions::new()
+            .read(true)
+            .write(false)
+            .open(path)
+            .map_err(|e| APMErrorType::FileOpenError.into_apm_error(e.to_string()))?;
 
-    f.read_to_end(&mut contents)
-        .map_err(|e| APMErrorType::FileReadError.into_apm_error(e.to_string()))?;
+        f.read_to_end(&mut contents)
+            .map_err(|e| APMErrorType::FileReadError.into_apm_error(e.to_string()))?;
+    }
 
     let hash_bytes = generate_archer_hash_from_bytes(&contents);
     let hash_string = base64::encode(hash_bytes);
@@ -155,7 +163,7 @@ mod tests {
 
     #[test]
     fn test_modify_sample() {
-        let (modified_zip, _) = insert_checksum_zip(SAMPLE_ZIP).unwrap();
+        let (modified_zip, _) = insert_checksum_zip(SAMPLE_ZIP, false).unwrap();
         let files = dump_file_names_zip_bytes(&modified_zip).unwrap();
         let mut found = false;
 

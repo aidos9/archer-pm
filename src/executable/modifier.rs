@@ -49,7 +49,7 @@ fn execute_op(op: ModiferOperation) -> Result<(), APMError> {
                     println!();
                 }
 
-                let (zip, found) = package_compression::remove_checksum(&path)?;
+                let (zip, found) = package_compression::remove_checksum_zip(&path)?;
 
                 if !found {
                     eprintln!("Checksum not found");
@@ -60,34 +60,56 @@ fn execute_op(op: ModiferOperation) -> Result<(), APMError> {
 
                 println!("Checksum file removed");
                 println!("Output: {}", dest);
+            } else {
+                eprintln!("Error: No path specified");
             }
         }
-        ModiferOperation::AddChecksum { path, output_path } => {
-            let p = Path::new(&path);
-
-            if !p.exists() {
-                eprintln!("Error: There is no file at {}", path);
+        ModiferOperation::AddChecksum {
+            name,
+            path,
+            output_path,
+            remove_checksum,
+        } => {
+            if let Some(_name) = name {
+                eprintln!("Error: Manager is not enabled.");
                 exit(1);
             }
 
-            let dest = output_path.unwrap_or(path.clone());
+            if let Some(path) = path {
+                let p = Path::new(&path);
 
-            if Path::new(&dest).exists() {
-                if !y_n_question(&format!(
-                    "There already exists a file at {}\nOverwrite?",
-                    dest
-                )) {
-                    eprintln!("Aborting");
-                    exit(0);
+                if !p.exists() {
+                    eprintln!("Error: There is no file at {}", path);
+                    exit(1);
                 }
+
+                let dest = output_path.unwrap_or(path.clone());
+
+                if Path::new(&dest).exists() {
+                    if !y_n_question(&format!(
+                        "There already exists a file at {}\nOverwrite?",
+                        dest
+                    )) {
+                        eprintln!("Aborting");
+                        exit(0);
+                    }
+                }
+
+                if remove_checksum {
+                    println!("Removing checksum if found");
+                }
+
+                let (zip, checksum) =
+                    package_compression::insert_checksum_zip(&path, remove_checksum)?;
+
+                write_bytes(&zip, &dest)?;
+
+                println!("Checksum Added: {}", checksum);
+                println!("Output: {}", dest);
+            } else {
+                eprintln!("Error: No path specifed.");
+                exit(1);
             }
-
-            let (zip, checksum) = package_compression::insert_checksum_zip(&path)?;
-
-            write_bytes(&zip, &dest)?;
-
-            println!("Checksum Added: {}", checksum);
-            println!("Output: {}", dest);
         }
         ModiferOperation::MakePackage {
             add_to_db,

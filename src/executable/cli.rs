@@ -30,7 +30,8 @@ pub enum ModiferOperation {
             conflicts_with = "path",
             short,
             help = "The name of the package as stored in the management DB",
-            required_unless_present = "path"
+            required_unless_present = "path",
+            requires = "output_path"
         )]
         name: Option<String>,
         #[clap(
@@ -40,11 +41,7 @@ pub enum ModiferOperation {
             required_unless_present = "name"
         )]
         path: Option<String>,
-        #[clap(
-            short,
-            help = "The path to the output zip file",
-            required_unless_present = "path"
-        )]
+        #[clap(short, help = "The path to the output zip file")]
         output_path: Option<String>,
         #[clap(short, help = "Show verbose output")]
         verbose: bool,
@@ -55,8 +52,21 @@ pub enum ModiferOperation {
         about = "Generate and add the checksum to an existing package"
     )]
     AddChecksum {
-        #[clap(help = "The path to the archer zip file")]
-        path: String,
+        #[clap(
+            conflicts_with = "path",
+            short,
+            help = "The name of the package as stored in the management DB"
+        )]
+        name: Option<String>,
+        #[clap(short, help = "Remove the checksum if present in the zip file")]
+        remove_checksum: bool,
+        #[clap(
+            short,
+            help = "The path to the archer zip file",
+            required_unless_present = "name",
+            conflicts_with = "name"
+        )]
+        path: Option<String>,
         #[clap(short, help = "The path to the output zip file")]
         output_path: Option<String>,
     },
