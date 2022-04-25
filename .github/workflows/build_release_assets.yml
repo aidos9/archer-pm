@@ -2,8 +2,7 @@ name: Build Release
 
 on:
   release:
-    types:
-      - publish
+    types: [released]
 
 env:
   CARGO_TERM_COLOR: always
