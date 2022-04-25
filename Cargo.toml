@@ -1,0 +1,20 @@
+[package]
+name = "archer_package_manager"
+version = "0.1.0"
+edition = "2021"
+
+
+[[bin]]
+name = "apm"
+path = "src/executable/main.rs"
+required-features = ["with-exe"]
+
+[features]
+default = ["with-exe"]
+with-exe = ["clap"]
+
+[dependencies]
+zip = "0.6" 
+sha2 = "0.10"
+base64 = "0.13"
+clap = { version = "3.1", features = ["derive"], optional = true }
