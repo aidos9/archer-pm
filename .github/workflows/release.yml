@@ -22,6 +22,8 @@ jobs:
         export VERSION_NAME=$versionName
         export RELEASE_NAME=$releaseName
         echo "Determined version name=$versionName"
+        echo "::set-env name=VERSION_NAME::$VERSION_NAME"
+        echo "::set-env name=RELEASE_NAME::$RELEASE_NAME"
     - uses: ncipollo/release-action@v1
       with:
         body: "See CHANGELOG.md for latest release notes"
