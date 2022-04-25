@@ -16,8 +16,8 @@ jobs:
     - name: Extract Version Name
       run: |
         versionName=`perl -ne 'print "$&" if /(?<=version\s=\s\").*(?=\"\n)/' < Cargo.toml`
-        export VERSION_NAME=$versionName
-        echo "::set-env name=VERSION_NAME::$VERSION_NAME"
+        echo "::Determined version name="
+        echo $versionName
   build_windows:
     runs-on: windows-latest
     
