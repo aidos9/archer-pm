@@ -17,7 +17,7 @@ jobs:
       run: |
         version=`perl -ne 'print "$&" if /(?<=version\s=\s\").*(?=\"\n)/' < Cargo.toml`
         versionName="v$version"
-        releaseName="Release - $version"
+        releaseName="Release - $versionName"
         export VERSION=$version
         export VERSION_NAME=$versionName
         export RELEASE_NAME=$releaseName
@@ -28,8 +28,8 @@ jobs:
       with:
         body: "See CHANGELOG.md for latest release notes"
         commit: main
-        tag: ${{ env.versionName }}
-        name: ${{ env.releaseName }}
+        tag: ${{ env.VERSION_NAME }}
+        name: ${{ env.RELEASE_NAME }}
         token: ${{ secrets.GITHUB_TOKEN }}
 #   build_windows:
 #     runs-on: windows-latest
