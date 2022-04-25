@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v3
     - name: Extract Version Name
       run: |
-        versionName=`perl -ne 'print "$&" if /(?<=version\s=\s\").*(?=\"\n)/' < Cargo.toml`
+        versionName=v`perl -ne 'print "$&" if /(?<=version\s=\s\").*(?=\"\n)/' < Cargo.toml`
         echo "Determined version name=$versionName"
 #   build_windows:
 #     runs-on: windows-latest
