@@ -1,10 +1,9 @@
 name: Build Release
 
 on:
-  workflow_run:
-    workflows: Create Release
+  release:
     types:
-      - completed
+      - published
 
 env:
   CARGO_TERM_COLOR: always
