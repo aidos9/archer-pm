@@ -30,4 +30,4 @@ jobs:
         commit: main
         tag: ${{ env.VERSION_NAME }}
         name: ${{ env.RELEASE_NAME }}
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.RELEASES_TOKEN }}
