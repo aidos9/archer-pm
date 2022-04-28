@@ -43,7 +43,7 @@ pub enum ModiferOperation {
         path: Option<String>,
         #[clap(short, help = "The path to the output zip file")]
         output_path: Option<String>,
-        #[clap(short, help = "Show verbose output")]
+        #[clap(short, long, help = "Show verbose output")]
         verbose: bool,
     },
     #[clap(
@@ -76,28 +76,29 @@ pub enum ModiferOperation {
         about = "Create a new package from a directory"
     )]
     MakePackage {
-        #[clap(short = 'a', long = "add", help = "Add the package to the database")]
+        #[clap(
+            short = 'a',
+            long = "add",
+            help = "Add the package to the database",
+            requires = "name"
+        )]
         add_to_db: bool,
         input_directory: String,
         #[clap(
-            short = 'n',
             long = "name",
-            help = "Specify the name of the package, required if output path is not specified",
-            required_unless_present = "output_path"
+            help = "Specify the name of the package if adding to the db"
         )]
         name: Option<String>,
-        #[clap(
-            short = 'v',
-            long = "version",
-            help = "Specify the version of the package"
-        )]
+        #[clap(long = "version", help = "Specify the version of the package")]
         version: Option<String>,
         #[clap(
             name = "output_path",
             short = 'o',
             long = "output",
-            help = "Specify the output path for the package [default = 'name-version.zip']"
+            help = "Specify the output path for the package"
         )]
         output_path: Option<String>,
+        #[clap(short, long, help = "Show verbose output")]
+        verbose: bool,
     },
 }

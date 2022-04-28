@@ -17,6 +17,9 @@ pub enum APMErrorType {
     ZIPFileReadError,
     ZIPFileWriteError,
     HashUTF8Error,
+    WalkdirError,
+    SymlinkFoundError,
+    CannotProcessFileNameError,
 }
 
 #[derive(Clone, PartialEq, Hash, Debug)]
@@ -51,6 +54,9 @@ impl fmt::Display for APMErrorType {
             APMErrorType::ZIPFileReadError => "ZIP File Read Error",
             APMErrorType::ZIPFileWriteError => "ZIP File Write Error",
             APMErrorType::HashUTF8Error => "Hash was not UTF-8 Error",
+            APMErrorType::WalkdirError => "Walk Directory Error",
+            APMErrorType::SymlinkFoundError => "Symlink Error",
+            APMErrorType::CannotProcessFileNameError => "Cannot Process File Name Error",
         };
 
         return write!(f, "{}", s);

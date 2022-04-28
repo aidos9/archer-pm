@@ -3,6 +3,8 @@ use crate::error::{APMError, APMErrorType};
 use sha2::{Digest, Sha256};
 use std::fs::{File, OpenOptions};
 use std::io::{Cursor, Read, Write};
+use walkdir::WalkDir;
+use zip::write::FileOptions;
 use zip::{ZipArchive, ZipWriter};
 
 const HIDDEN_FILE_PATH: &'static str = "/hidden";
@@ -67,7 +69,6 @@ pub fn insert_checksum_zip(
     path: &str,
     remove_checksum: bool,
 ) -> Result<(Vec<u8>, String), APMError> {
-    let options = zip::write::FileOptions::default();
     let mut contents;
 
     if remove_checksum {
@@ -84,6 +85,12 @@ pub fn insert_checksum_zip(
         f.read_to_end(&mut contents)
             .map_err(|e| APMErrorType::FileReadError.into_apm_error(e.to_string()))?;
     }
+
+    return add_checksum_zip(contents);
+}
+
+pub fn add_checksum_zip(mut contents: Vec<u8>) -> Result<(Vec<u8>, String), APMError> {
+    let options = zip::write::FileOptions::default();
 
     let hash_bytes = generate_archer_hash_from_bytes(&contents);
     let hash_string = base64::encode(hash_bytes);
@@ -153,6 +160,77 @@ fn generate_archer_hash_from_bytes(bytes: &[u8]) -> [u8; 32] {
     hasher.update(bytes);
 
     return hasher.finalize().into();
+}
+
+pub fn compress_directory(
+    path: &str,
+    track_file_names: bool,
+) -> Result<(Vec<u8>, Option<Vec<String>>), APMError> {
+    let mut buffer = Vec::new();
+    let options = FileOptions::default();
+    let mut zip_writer = ZipWriter::new(Cursor::new(&mut buffer));
+    let mut file_names = {
+        if track_file_names {
+            Some(Vec::new())
+        } else {
+            None
+        }
+    };
+
+    for entry in WalkDir::new(path).into_iter() {
+        let entry = entry.map_err(|e| APMErrorType::WalkdirError.into_apm_error(e.to_string()))?;
+
+        if entry.file_type().is_symlink() {
+            return Err(APMErrorType::SymlinkFoundError.into_apm_error(format!(
+                "Found symlink at path {}\nSymlinks cannot be compressed.",
+                entry.file_name().to_str().unwrap_or("PATH_UNKNOWN")
+            )));
+        } else if entry.file_type().is_dir() {
+            let dir_name = entry.path().display().to_string();
+
+            zip_writer
+                .add_directory(&dir_name, options)
+                .map_err(|e| APMErrorType::ZIPAddDirectoryError.into_apm_error(e.to_string()))?;
+
+            if let Some(file_names) = &mut file_names {
+                file_names.push(dir_name);
+            }
+        } else if entry.file_type().is_file() {
+            let f_name = entry.path().display().to_string();
+
+            zip_writer
+                .start_file(&f_name, options)
+                .map_err(|e| APMErrorType::ZIPStartFileError.into_apm_error(e.to_string()))?;
+
+            let mut temp = Vec::new();
+            let mut f = OpenOptions::new().read(true).open(&f_name).map_err(|e| {
+                APMErrorType::FileOpenError.into_apm_error(format!(
+                    "{}\nFile:{}",
+                    e.to_string(),
+                    f_name
+                ))
+            })?;
+
+            f.read_to_end(&mut temp)
+                .map_err(|e| APMErrorType::ZIPFileReadError.into_apm_error(e.to_string()))?;
+
+            zip_writer
+                .write_all(&mut temp)
+                .map_err(|e| APMErrorType::ZIPFileWriteError.into_apm_error(e.to_string()))?;
+
+            if let Some(file_names) = &mut file_names {
+                file_names.push(f_name);
+            }
+        }
+    }
+
+    zip_writer
+        .finish()
+        .map_err(|e| APMErrorType::ZIPFinishError.into_apm_error(e.to_string()))?;
+
+    drop(zip_writer);
+
+    return Ok((buffer, file_names));
 }
 
 #[cfg(test)]

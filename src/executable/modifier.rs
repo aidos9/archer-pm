@@ -117,7 +117,50 @@ fn execute_op(op: ModiferOperation) -> Result<(), APMError> {
             name,
             version,
             output_path,
-        } => todo!(),
+            verbose,
+        } => {
+            if add_to_db {
+                eprintln!("Error: Manager is not enabled.");
+                exit(1);
+            }
+
+            let dir_path = Path::new(&input_directory);
+
+            if !dir_path.exists() {
+                eprintln!("Error: Could not find a directory at {}", input_directory);
+                exit(1);
+            } else if !dir_path.is_dir() {
+                eprintln!("Error: There was no directory found at {}", input_directory);
+                exit(1);
+            }
+
+            let dest;
+
+            if let Some(output_path) = output_path {
+                dest = output_path;
+            } else if let Some(name) = name {
+                if let Some(version) = version {
+                    dest = format!("{}-v{}.zip", name, version);
+                } else {
+                    dest = format!("{}.zip", name);
+                }
+            } else {
+                if let Some(Some(last_component)) =
+                    dir_path.components().last().map(|v| v.as_os_str().to_str())
+                {
+                    dest = format!("{}.zip", last_component);
+                } else {
+                    dest = "output.zip".to_string();
+                }
+            }
+
+            println!("Compressing...");
+
+            create_package_file(&input_directory, &dest, verbose)?;
+
+            println!("Successfully created package");
+            println!("Output: {}", dest);
+        }
     }
 
     return Ok(());
@@ -136,4 +179,20 @@ pub fn write_bytes(b: &[u8], p: &str) -> Result<(), APMError> {
         .map_err(|e| APMErrorType::FileWriteError.into_apm_error(e.to_string()))?;
 
     return Ok(());
+}
+
+pub fn create_package_file(dir: &str, out: &str, verbose: bool) -> Result<(), APMError> {
+    let (zip_contents, files) = package_compression::compress_directory(dir, verbose)?;
+
+    if let Some(files) = files {
+        for f in files {
+            println!("Compressed: {}", f);
+        }
+    }
+
+    let (zip_contents, checksum) = package_compression::add_checksum_zip(zip_contents)?;
+
+    println!("Checksum: {}", checksum);
+
+    return write_bytes(&zip_contents, out);
 }
