@@ -180,34 +180,37 @@ pub fn compress_directory(
     for entry in WalkDir::new(path).into_iter() {
         let entry = entry.map_err(|e| APMErrorType::WalkdirError.into_apm_error(e.to_string()))?;
 
+        let name = entry.path().display().to_string();
+
+        // Skip the current directory
+        if name == path {
+            continue;
+        }
+
         if entry.file_type().is_symlink() {
             return Err(APMErrorType::SymlinkFoundError.into_apm_error(format!(
                 "Found symlink at path {}\nSymlinks cannot be compressed.",
                 entry.file_name().to_str().unwrap_or("PATH_UNKNOWN")
             )));
         } else if entry.file_type().is_dir() {
-            let dir_name = entry.path().display().to_string();
-
             zip_writer
-                .add_directory(&dir_name, options)
+                .add_directory(&name, options)
                 .map_err(|e| APMErrorType::ZIPAddDirectoryError.into_apm_error(e.to_string()))?;
 
             if let Some(file_names) = &mut file_names {
-                file_names.push(dir_name);
+                file_names.push(name);
             }
         } else if entry.file_type().is_file() {
-            let f_name = entry.path().display().to_string();
-
             zip_writer
-                .start_file(&f_name, options)
+                .start_file(&name, options)
                 .map_err(|e| APMErrorType::ZIPStartFileError.into_apm_error(e.to_string()))?;
 
             let mut temp = Vec::new();
-            let mut f = OpenOptions::new().read(true).open(&f_name).map_err(|e| {
+            let mut f = OpenOptions::new().read(true).open(&name).map_err(|e| {
                 APMErrorType::FileOpenError.into_apm_error(format!(
                     "{}\nFile:{}",
                     e.to_string(),
-                    f_name
+                    name
                 ))
             })?;
 
@@ -219,7 +222,7 @@ pub fn compress_directory(
                 .map_err(|e| APMErrorType::ZIPFileWriteError.into_apm_error(e.to_string()))?;
 
             if let Some(file_names) = &mut file_names {
-                file_names.push(f_name);
+                file_names.push(name);
             }
         }
     }
