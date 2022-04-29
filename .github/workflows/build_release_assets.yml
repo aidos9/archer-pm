@@ -20,7 +20,7 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_path: "target/release/apm.exe"
-        asset_name: "apm-win-x64"
+        asset_name: "apm-win-x64.exe"
         github_token: ${{ secrets.RELEASES_TOKEN }}
     
   build_linux:
