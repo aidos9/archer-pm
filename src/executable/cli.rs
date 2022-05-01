@@ -16,6 +16,9 @@ pub enum Command {
         #[clap(subcommand)]
         operation: ModiferOperation,
     },
+    // #[clap(name = "info")]
+    // #[clap(about = "Report Information about a package's contents")]
+    // Info {},
 }
 
 #[derive(Debug, PartialEq, Subcommand)]
@@ -30,8 +33,7 @@ pub enum ModiferOperation {
             conflicts_with = "path",
             short,
             help = "The name of the package as stored in the management DB",
-            required_unless_present = "path",
-            requires = "output_path"
+            required_unless_present = "path"
         )]
         name: Option<String>,
         #[clap(

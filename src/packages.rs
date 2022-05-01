@@ -1,13 +1,19 @@
 use crate::error::{APMError, APMErrorType};
+use crate::zip_manipulation::read_archive;
 
 use sha2::{Digest, Sha256};
-use std::fs::{File, OpenOptions};
+use std::fs::OpenOptions;
 use std::io::{Cursor, Read, Write};
-use walkdir::WalkDir;
-use zip::write::FileOptions;
 use zip::{ZipArchive, ZipWriter};
 
 const HIDDEN_FILE_PATH: &'static str = "/hidden";
+
+pub struct Package {
+    contents: Option<PackageContents>,
+    source_path: String,
+}
+
+pub struct PackageContents {}
 
 pub fn remove_checksum_zip(path: &str) -> Result<(Vec<u8>, bool), APMError> {
     let mut archive = read_archive(path)?;
@@ -52,17 +58,6 @@ pub fn remove_checksum_zip(path: &str) -> Result<(Vec<u8>, bool), APMError> {
     drop(zip_writer);
 
     return Ok((output, checksum_removed));
-}
-
-fn read_archive(path: &str) -> Result<ZipArchive<File>, APMError> {
-    let mut f = OpenOptions::new()
-        .read(true)
-        .write(false)
-        .open(path)
-        .map_err(|e| APMErrorType::FileOpenError.into_apm_error(e.to_string()))?;
-
-    return Ok(ZipArchive::new(f)
-        .map_err(|e| APMErrorType::ZIPArchiveOpenError.into_apm_error(e.to_string()))?);
 }
 
 pub fn insert_checksum_zip(
@@ -160,80 +155,6 @@ fn generate_archer_hash_from_bytes(bytes: &[u8]) -> [u8; 32] {
     hasher.update(bytes);
 
     return hasher.finalize().into();
-}
-
-pub fn compress_directory(
-    path: &str,
-    track_file_names: bool,
-) -> Result<(Vec<u8>, Option<Vec<String>>), APMError> {
-    let mut buffer = Vec::new();
-    let options = FileOptions::default();
-    let mut zip_writer = ZipWriter::new(Cursor::new(&mut buffer));
-    let mut file_names = {
-        if track_file_names {
-            Some(Vec::new())
-        } else {
-            None
-        }
-    };
-
-    for entry in WalkDir::new(path).into_iter() {
-        let entry = entry.map_err(|e| APMErrorType::WalkdirError.into_apm_error(e.to_string()))?;
-
-        let name = entry.path().display().to_string();
-
-        // Skip the current directory
-        if name == path {
-            continue;
-        }
-
-        if entry.file_type().is_symlink() {
-            return Err(APMErrorType::SymlinkFoundError.into_apm_error(format!(
-                "Found symlink at path {}\nSymlinks cannot be compressed.",
-                entry.file_name().to_str().unwrap_or("PATH_UNKNOWN")
-            )));
-        } else if entry.file_type().is_dir() {
-            zip_writer
-                .add_directory(&name, options)
-                .map_err(|e| APMErrorType::ZIPAddDirectoryError.into_apm_error(e.to_string()))?;
-
-            if let Some(file_names) = &mut file_names {
-                file_names.push(name);
-            }
-        } else if entry.file_type().is_file() {
-            zip_writer
-                .start_file(&name, options)
-                .map_err(|e| APMErrorType::ZIPStartFileError.into_apm_error(e.to_string()))?;
-
-            let mut temp = Vec::new();
-            let mut f = OpenOptions::new().read(true).open(&name).map_err(|e| {
-                APMErrorType::FileOpenError.into_apm_error(format!(
-                    "{}\nFile:{}",
-                    e.to_string(),
-                    name
-                ))
-            })?;
-
-            f.read_to_end(&mut temp)
-                .map_err(|e| APMErrorType::ZIPFileReadError.into_apm_error(e.to_string()))?;
-
-            zip_writer
-                .write_all(&mut temp)
-                .map_err(|e| APMErrorType::ZIPFileWriteError.into_apm_error(e.to_string()))?;
-
-            if let Some(file_names) = &mut file_names {
-                file_names.push(name);
-            }
-        }
-    }
-
-    zip_writer
-        .finish()
-        .map_err(|e| APMErrorType::ZIPFinishError.into_apm_error(e.to_string()))?;
-
-    drop(zip_writer);
-
-    return Ok((buffer, file_names));
 }
 
 #[cfg(test)]

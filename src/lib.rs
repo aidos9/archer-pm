@@ -1,2 +1,3 @@
 pub mod error;
-pub mod package_compression;
+pub mod packages;
+pub mod zip_manipulation;

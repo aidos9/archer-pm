@@ -1,5 +1,5 @@
 use archer_package_manager::error::{APMError, APMErrorType};
-use archer_package_manager::package_compression;
+use archer_package_manager::{packages, zip_manipulation};
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::Path;
@@ -43,13 +43,13 @@ fn execute_op(op: ModiferOperation) -> Result<(), APMError> {
 
                 if verbose {
                     println!("Files:");
-                    for f in package_compression::dump_file_names_zip(&path)? {
+                    for f in packages::dump_file_names_zip(&path)? {
                         println!("{}", f);
                     }
                     println!();
                 }
 
-                let (zip, found) = package_compression::remove_checksum_zip(&path)?;
+                let (zip, found) = packages::remove_checksum_zip(&path)?;
 
                 if !found {
                     eprintln!("Checksum not found");
@@ -99,8 +99,7 @@ fn execute_op(op: ModiferOperation) -> Result<(), APMError> {
                     println!("Removing checksum if found");
                 }
 
-                let (zip, checksum) =
-                    package_compression::insert_checksum_zip(&path, remove_checksum)?;
+                let (zip, checksum) = packages::insert_checksum_zip(&path, remove_checksum)?;
 
                 write_bytes(&zip, &dest)?;
 
@@ -182,7 +181,7 @@ pub fn write_bytes(b: &[u8], p: &str) -> Result<(), APMError> {
 }
 
 pub fn create_package_file(dir: &str, out: &str, verbose: bool) -> Result<(), APMError> {
-    let (zip_contents, files) = package_compression::compress_directory(dir, verbose)?;
+    let (zip_contents, files) = zip_manipulation::compress_directory(dir, verbose)?;
 
     if let Some(files) = files {
         for f in files {
@@ -190,7 +189,7 @@ pub fn create_package_file(dir: &str, out: &str, verbose: bool) -> Result<(), AP
         }
     }
 
-    let (zip_contents, checksum) = package_compression::add_checksum_zip(zip_contents)?;
+    let (zip_contents, checksum) = packages::add_checksum_zip(zip_contents)?;
 
     println!("Checksum: {}", checksum);
 
