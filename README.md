@@ -5,8 +5,7 @@ RSA Archer Package Manager, is a project intended to create a better method of m
 - [ ] Local Package Management
 - [ ] Remote Package Management
 - [ ] Upload/Download/Install to Archer Instance Support
-- [ ] Extract and modify packages
-- [ ] Compress directories into packages
+- [x] Compress directories into packages
 - [x] Add RSA archer compatible checksums to modified packages
 - [x] Remove the checksum from a zipped package
 
