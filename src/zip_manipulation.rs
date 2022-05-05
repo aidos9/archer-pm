@@ -63,7 +63,7 @@ pub fn compress_directory(
 }
 
 pub fn read_archive(path: &str) -> Result<ZipArchive<File>, APMError> {
-    let mut f = OpenOptions::new()
+    let f = OpenOptions::new()
         .read(true)
         .write(false)
         .open(path)

@@ -8,13 +8,6 @@ use zip::{ZipArchive, ZipWriter};
 
 const HIDDEN_FILE_PATH: &'static str = "/hidden";
 
-pub struct Package {
-    contents: Option<PackageContents>,
-    source_path: String,
-}
-
-pub struct PackageContents {}
-
 pub fn remove_checksum_zip(path: &str) -> Result<(Vec<u8>, bool), APMError> {
     let mut archive = read_archive(path)?;
     let options = zip::write::FileOptions::default();

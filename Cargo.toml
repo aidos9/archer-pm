@@ -10,8 +10,16 @@ path = "src/executable/main.rs"
 required-features = ["with-exe"]
 
 [features]
-default = ["with-exe"]
+default = ["all"]
+all = ["with-exe", "with-info", "all_exporters"]
+
 with-exe = ["clap"]
+with-info = ["with-exe", "serde-xml-rs"]
+
+all_exporters = ["json_exporter", "toml_exporter", "xml_exporter"]
+json_exporter = ["serde", "serde_json"]
+toml_exporter = ["serde", "toml"]
+xml_exporter = ["serde", "serde-xml-rs"]
 
 [dependencies]
 zip = "0.6" 
@@ -19,3 +27,7 @@ sha2 = "0.10"
 base64 = "0.13"
 walkdir = "2.3"
 clap = { version = "3.1", features = ["derive"], optional = true }
+serde-xml-rs = { version = "0.5", optional = true }
+serde_json = { version = "1.0", optional = true }
+serde = { version = "1.0", features = ["derive"], optional = true }
+toml = { version = "0.5", optional = true }

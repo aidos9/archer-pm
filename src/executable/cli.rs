@@ -10,15 +10,17 @@ pub struct CLIArgs {
 pub enum Command {
     #[clap(name = "man")]
     Manager,
-    #[clap(name = "mod")]
-    #[clap(about = "Modify an existing package")]
+    #[clap(name = "mod", about = "Modify an existing package")]
     Modifier {
         #[clap(subcommand)]
         operation: ModiferOperation,
     },
-    // #[clap(name = "info")]
-    // #[clap(about = "Report Information about a package's contents")]
-    // Info {},
+    #[cfg(feature = "with-info")]
+    #[clap(name = "info", about = "Report Information about a package's contents")]
+    Info {
+        #[clap(subcommand)]
+        operation: InformationOperation,
+    },
 }
 
 #[derive(Debug, PartialEq, Subcommand)]
@@ -103,4 +105,60 @@ pub enum ModiferOperation {
         #[clap(short, long, help = "Show verbose output")]
         verbose: bool,
     },
+}
+
+#[cfg(feature = "with-info")]
+#[derive(Debug, PartialEq, Subcommand)]
+pub enum InformationOperation {
+    #[clap(
+        short_flag = 'o',
+        name = "overview",
+        about = "Print information about a package"
+    )]
+    Overview {
+        #[clap(short, help = "Lists package contents in increased detail")]
+        detailed: bool,
+        #[clap(short, help = "Prints processing information")]
+        verbose: bool,
+        #[clap(
+            short,
+            long,
+            help = "Specify the package file to process",
+            required_unless_present = "name"
+        )]
+        path: Option<String>,
+        #[clap(short, long, help = "Specify a package name stored in the database")]
+        name: Option<String>,
+    },
+    #[clap(
+        short_flag = 'a',
+        name = "apps",
+        about = "Print information about a package"
+    )]
+    Applications {
+        #[clap(short = 'l', long = "list-apps", help = "Lists all applications")]
+        list_applications: bool,
+        #[clap(
+            short = 'a',
+            long = "list-aw",
+            help = "Lists all applications with advanced workflow"
+        )]
+        list_aw: bool,
+        #[clap(
+            short,
+            long,
+            help = "Specify the package file to process",
+            required_unless_present = "name"
+        )]
+        path: Option<String>,
+        #[clap(short, long, help = "Specify a package name stored in the database")]
+        name: Option<String>,
+    },
+    Datafeeds,
+    Notifications,
+    Solutions,
+    Dashboards,
+    Workspaces,
+    DataDrivenEvents,
+    Levels,
 }
