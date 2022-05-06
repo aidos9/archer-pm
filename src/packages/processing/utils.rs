@@ -18,7 +18,7 @@ pub struct PackageFileReader {
 }
 
 impl PackageFile {
-    pub fn load_package_file(base_file: String) -> Result<Self, ProcessingError> {
+    pub fn new(base_file: String) -> Result<Self, ProcessingError> {
         let mut files = Vec::new();
 
         if !Path::new(&base_file).exists() {
@@ -27,7 +27,7 @@ impl PackageFile {
         }
 
         for i in 1..MAX_FILES {
-            let name = format!("{}{:0>4}", &base_file, i);
+            let name = format!("{}.{:0>4}", &base_file, i);
 
             if Path::new(&name).exists() {
                 files.push(name);
@@ -103,5 +103,28 @@ impl Read for PackageFileReader {
         }
 
         return Ok(0);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_read_multiple() {
+        let f_name = "test_files/test_dir/next_level/file.xml";
+        let f = PackageFile::new(f_name.to_string()).unwrap();
+        let mut buf = Vec::new();
+        f.get_reader().unwrap().read_to_end(&mut buf).unwrap();
+        assert_eq!(buf, b"abcdefghi");
+    }
+
+    #[test]
+    fn test_read_singlee() {
+        let f_name = "test_files/test_dir/next_level/test.xml";
+        let f = PackageFile::new(f_name.to_string()).unwrap();
+        let mut buf = Vec::new();
+        f.get_reader().unwrap().read_to_end(&mut buf).unwrap();
+        assert_eq!(buf, b"test");
     }
 }
