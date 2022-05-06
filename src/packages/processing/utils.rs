@@ -67,7 +67,7 @@ impl PackageFileReader {
         return Ok(reader);
     }
 
-    pub fn open(&mut self, base_file: &str, files: &[String]) -> Result<(), ProcessingError> {
+    fn open(&mut self, base_file: &str, files: &[String]) -> Result<(), ProcessingError> {
         self.files.push(
             OpenOptions::new()
                 .read(true)
@@ -117,6 +117,17 @@ mod tests {
         let mut buf = Vec::new();
         f.get_reader().unwrap().read_to_end(&mut buf).unwrap();
         assert_eq!(buf, b"abcdefghi");
+    }
+
+    #[test]
+    fn test_read_multiple_2() {
+        let f_name = "test_files/test_dir/next_level/file.xml";
+        let contents = PackageFile::new(f_name.to_string())
+            .unwrap()
+            .read_all_files()
+            .unwrap();
+
+        assert_eq!(contents, b"abcdefghi");
     }
 
     #[test]
