@@ -6,6 +6,9 @@ pub enum ProcessingErrorType {
     BaseFileNotFoundError(String),
     #[cfg(feature = "json_exporter")]
     JSONExportError,
+    XMLEventDeserializeError,
+    XMLAttributeDeserializeError,
+    UTF8Error,
 }
 
 #[derive(Debug, Hash, PartialEq, Clone)]
@@ -32,12 +35,17 @@ impl ProcessingErrorType {
             ProcessingErrorType::BaseFileNotFoundError(f) => {
                 format!("Base File ({}) Not Found Error", f)
             }
+            ProcessingErrorType::XMLEventDeserializeError => "XML Deserialize Error".to_string(),
+            ProcessingErrorType::XMLAttributeDeserializeError => {
+                "XML Attribute Deserialize Error".to_string()
+            }
+            ProcessingErrorType::UTF8Error => "UTF-8 Error".to_string(),
         };
     }
 }
 
 impl ProcessingError {
-    pub fn new(tp: ProcessingErrorType, debug_msg: String, public_msg: String) -> Self {
+    pub(crate) fn new(tp: ProcessingErrorType, debug_msg: String, public_msg: String) -> Self {
         return Self {
             tp,
             debug_msg,

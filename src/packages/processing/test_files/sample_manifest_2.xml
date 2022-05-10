@@ -5,12 +5,12 @@
     <PackageGuid>8585b948-2c07-4a38-bb2a-a7a5cb0f753b</PackageGuid>
     <PackageVersion>6.9.10100.1114</PackageVersion>
     <PackageProvider>Test Package Provider</PackageProvider>
-    <PackageDescription/>
+    <PackageDescription>My description</PackageDescription>
     <PackageDate>2022-04-14T02:39:35.1480573Z</PackageDate>
     <ObjectGroup fileUri="archerschema.xsd">
         <Application>
             <Name>Application</Name>
-            <Guid>603a48f5-2c07-4a38-afb5-a7a5cb0f753b</Guid>
+            <Guid>aaaaaaaa-2c07-4a38-afb5-a7a5cb0f753b</Guid>
             <Status>ActiveInProduction</Status>
         </Application>
     </ObjectGroup>
@@ -25,14 +25,21 @@
     <ObjectGroup fileUri="Schedules.xml" />
     <ObjectGroup fileUri="NavigationMenu.xml" />
     <ObjectGroup fileUri="DataDrivenEvent.xml" />
-    <ObjectGroup fileUri="ReportDefinitions.xml" />
+    <ObjectGroup fileUri="ReportDefinitions.xml">
+        <GlobalReport>
+            <Name>Report</Name>
+            <Guid>aaaaaaaa-4866-40ea-a298-99afb348598d</Guid>
+            <Status></Status>
+            <ParentGuid>aaaaaaaa-4b51-404c-91c2-40ade972e95b</ParentGuid>
+        </GlobalReport>
+    </ObjectGroup>
     <ObjectGroup fileUri="Workflow.xml" />
     <ObjectGroup fileUri="Notifications.xml" />
     <ObjectGroup fileUri="Solutions.xml" />
     <ObjectGroup fileUri="DataFeeds.xml">
         <DataFeed>
             <Name>MyDatafeed</Name>
-            <Guid>aa5aabaa-bbd3-46bb-bb1e-a7a5cb0f753b</Guid>
+            <Guid>aaaaaaaa-bbd3-46bb-bb1e-a7a5cb0f753b</Guid>
             <Status>True</Status>
         </DataFeed>
     </ObjectGroup>
@@ -51,7 +58,7 @@
     <ObjectRelationGroup>
         <ObjectRelation>
             <ParentType>Application</ParentType>
-            <ParentGuid>603a48f5-2c07-4da2-afb5-839144efc58a</ParentGuid>
+            <ParentGuid>aaaaaaaa-2c07-4da2-afb5-839144efc58a</ParentGuid>
             <ChildType>Language</ChildType>
             <ChildGuid>9088ef11-366b-47bd-8462-a7a5cb0f753b</ChildGuid>
         </ObjectRelation>
