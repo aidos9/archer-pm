@@ -1,9 +1,10 @@
 use super::error::{ProcessingError, ProcessingErrorType};
 
-use std::io;
 use std::{collections::HashMap, io::BufReader};
+use std::{fmt, io};
 
 use fast_xml::{events::Event, Reader};
+use serde::de::Visitor;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
@@ -34,7 +35,7 @@ pub struct ObjectGroup {
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 pub struct ManifestObject {
     #[serde(rename = "Tag")]
-    object_tag: String,
+    object_tag: ManifestObjectTag,
     #[serde(rename = "Name")]
     name: String,
     #[serde(rename = "Guid")]
@@ -44,6 +45,14 @@ pub struct ManifestObject {
     #[serde(skip_serializing_if = "Option::is_none", rename = "AdditionalPairs")]
     additional_pairs: Option<HashMap<String, String>>,
 }
+
+#[derive(Debug, PartialEq, Clone, Hash)]
+pub enum ManifestObjectTag {
+    Datafeed,
+    Other(String),
+}
+
+struct ManifestObjectTagVisitor;
 
 impl Manifest {
     pub fn new(
@@ -229,8 +238,10 @@ impl Manifest {
     ) -> Result<ManifestObject, ProcessingError> {
         let mut obj = ManifestObject::default();
 
-        obj.object_tag = String::from_utf8(n.to_vec())
-            .map_err(|e| ProcessingErrorType::UTF8Error.into_error(e.to_string()))?;
+        obj.object_tag = ManifestObjectTag::from(
+            String::from_utf8(n.to_vec())
+                .map_err(|e| ProcessingErrorType::UTF8Error.into_error(e.to_string()))?,
+        );
 
         loop {
             match reader.read_event(&mut Vec::new()).map_err(|e| {
@@ -331,7 +342,7 @@ impl Default for ObjectGroup {
 
 impl ManifestObject {
     pub fn new(
-        object_tag: String,
+        object_tag: ManifestObjectTag,
         name: String,
         guid: String,
         status: String,
@@ -347,14 +358,14 @@ impl ManifestObject {
     }
 
     pub fn new_str(
-        object_tag: &str,
+        object_tag: ManifestObjectTag,
         name: &str,
         guid: &str,
         status: &str,
         additional_pairs: Option<HashMap<String, String>>,
     ) -> Self {
         return Self::new(
-            object_tag.to_string(),
+            object_tag,
             name.to_string(),
             guid.to_string(),
             status.to_string(),
@@ -372,6 +383,75 @@ impl Default for ManifestObject {
             status: Default::default(),
             additional_pairs: None,
         };
+    }
+}
+
+impl ManifestObjectTag {
+    pub fn as_str(&self) -> &str {
+        return match self {
+            ManifestObjectTag::Datafeed => "DataFeed",
+            ManifestObjectTag::Other(s) => s.as_str(),
+        };
+    }
+}
+
+impl Serialize for ManifestObjectTag {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        return serializer.serialize_str(self.as_str());
+    }
+}
+
+impl<'de> Deserialize<'de> for ManifestObjectTag {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        return deserializer.deserialize_str(ManifestObjectTagVisitor);
+    }
+}
+
+impl<'a> From<&'a str> for ManifestObjectTag {
+    fn from(s: &'a str) -> Self {
+        return match s {
+            "DataFeed" => Self::Datafeed,
+            _ => Self::Other(s.to_string()),
+        };
+    }
+}
+
+impl From<String> for ManifestObjectTag {
+    fn from(s: String) -> Self {
+        return Self::from(s.as_str());
+    }
+}
+
+impl fmt::Display for ManifestObjectTag {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        return write!(f, "{}", self.as_str());
+    }
+}
+
+impl Default for ManifestObjectTag {
+    fn default() -> Self {
+        return Self::Other(String::new());
+    }
+}
+
+impl<'de> Visitor<'de> for ManifestObjectTagVisitor {
+    type Value = ManifestObjectTag;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        return formatter.write_str("a string");
+    }
+
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        return Ok(ManifestObjectTag::from(v));
     }
 }
 
@@ -397,7 +477,7 @@ mod tests {
                     ObjectGroup::new_str(
                         "archerschema.xsd",
                         vec![ManifestObject::new_str(
-                            "Application",
+                            ManifestObjectTag::from("Application"),
                             "Application",
                             "aaaaaaaa-2c07-4a38-afb5-a7a5cb0f753b",
                             "ActiveInProduction",
@@ -452,7 +532,7 @@ mod tests {
                     ObjectGroup {
                         file_uri: "DataFeeds.xml".to_string(),
                         objects: vec![ManifestObject::new(
-                            "DataFeed".to_string(),
+                            ManifestObjectTag::from("DataFeed"),
                             "MyDatafeed".to_string(),
                             "aaaaaaaa-bbd3-46bb-bb1e-a7a5cb0f753b".to_string(),
                             "True".to_string(),
@@ -482,7 +562,7 @@ mod tests {
                     ObjectGroup {
                         file_uri: "Translation.xml".to_string(),
                         objects: vec![ManifestObject::new(
-                            "Language".to_string(),
+                            ManifestObjectTag::from("Language"),
                             "English".to_string(),
                             "9088ef11-366b-47bd-8462-a7a5cb0f753b".to_string(),
                             "True".to_string(),
@@ -512,7 +592,7 @@ mod tests {
                     ObjectGroup {
                         file_uri: "archerschema.xsd".to_string(),
                         objects: vec![ManifestObject::new(
-                            "Application".to_string(),
+                            ManifestObjectTag::from("Application"),
                             "Application".to_string(),
                             "aaaaaaaa-2c07-4a38-afb5-a7a5cb0f753b".to_string(),
                             "ActiveInProduction".to_string(),
@@ -566,7 +646,7 @@ mod tests {
                     ObjectGroup {
                         file_uri: "ReportDefinitions.xml".to_string(),
                         objects: vec![ManifestObject::new(
-                            "GlobalReport".to_string(),
+                            ManifestObjectTag::from("GlobalReport"),
                             "Report".to_string(),
                             "aaaaaaaa-4866-40ea-a298-99afb348598d".to_string(),
                             String::new(),
@@ -590,7 +670,7 @@ mod tests {
                     ObjectGroup {
                         file_uri: "DataFeeds.xml".to_string(),
                         objects: vec![ManifestObject::new(
-                            "DataFeed".to_string(),
+                            ManifestObjectTag::from("DataFeed"),
                             "MyDatafeed".to_string(),
                             "aaaaaaaa-bbd3-46bb-bb1e-a7a5cb0f753b".to_string(),
                             "True".to_string(),
@@ -620,7 +700,7 @@ mod tests {
                     ObjectGroup {
                         file_uri: "Translation.xml".to_string(),
                         objects: vec![ManifestObject::new(
-                            "Language".to_string(),
+                            ManifestObjectTag::from("Language"),
                             "English".to_string(),
                             "9088ef11-366b-47bd-8462-a7a5cb0f753b".to_string(),
                             "True".to_string(),
@@ -648,7 +728,7 @@ mod tests {
                 vec![ObjectGroup::new_str(
                     "archerschema.xsd",
                     vec![ManifestObject::new_str(
-                        "Application",
+                        ManifestObjectTag::from("Application"),
                         "Application",
                         "603a48f5-2c07-4a38-afb5-a7a5cb0f753b",
                         "ActiveInProduction",
