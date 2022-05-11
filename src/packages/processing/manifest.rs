@@ -388,7 +388,7 @@ mod tests {
             manifest,
             Manifest::new_str(
                 "Package Name",
-                "8585b948-2c07-4a38-bb2a-a7a5cb0f753b",
+                "aaaaaaaa-2c07-4a38-bb2a-a7a5cb0f753b",
                 "6.9.10100.1114",
                 "Test Package Provider",
                 "",
@@ -399,7 +399,7 @@ mod tests {
                         vec![ManifestObject::new_str(
                             "Application",
                             "Application",
-                            "603a48f5-2c07-4a38-afb5-a7a5cb0f753b",
+                            "aaaaaaaa-2c07-4a38-afb5-a7a5cb0f753b",
                             "ActiveInProduction",
                             None,
                         )]
@@ -454,7 +454,7 @@ mod tests {
                         objects: vec![ManifestObject::new(
                             "DataFeed".to_string(),
                             "MyDatafeed".to_string(),
-                            "aa5aabaa-bbd3-46bb-bb1e-a7a5cb0f753b".to_string(),
+                            "aaaaaaaa-bbd3-46bb-bb1e-a7a5cb0f753b".to_string(),
                             "True".to_string(),
                             None,
                         )]
@@ -514,7 +514,7 @@ mod tests {
                         objects: vec![ManifestObject::new(
                             "Application".to_string(),
                             "Application".to_string(),
-                            "603a48f5-2c07-4a38-afb5-a7a5cb0f753b".to_string(),
+                            "aaaaaaaa-2c07-4a38-afb5-a7a5cb0f753b".to_string(),
                             "ActiveInProduction".to_string(),
                             None,
                         )]
@@ -592,7 +592,7 @@ mod tests {
                         objects: vec![ManifestObject::new(
                             "DataFeed".to_string(),
                             "MyDatafeed".to_string(),
-                            "aa5aabaa-bbd3-46bb-bb1e-a7a5cb0f753b".to_string(),
+                            "aaaaaaaa-bbd3-46bb-bb1e-a7a5cb0f753b".to_string(),
                             "True".to_string(),
                             None,
                         )]

@@ -2,7 +2,7 @@
 <Manifest Version="1.0.0.0"
     xmlns="http://www.archer.net/2010/packaging/manifest">
     <PackageName>Package Name</PackageName>
-    <PackageGuid>8585b948-2c07-4a38-bb2a-a7a5cb0f753b</PackageGuid>
+    <PackageGuid>aaaaaaaa-2c07-4a38-bb2a-a7a5cb0f753b</PackageGuid>
     <PackageVersion>6.9.10100.1114</PackageVersion>
     <PackageProvider>Test Package Provider</PackageProvider>
     <PackageDescription/>
@@ -10,7 +10,7 @@
     <ObjectGroup fileUri="archerschema.xsd">
         <Application>
             <Name>Application</Name>
-            <Guid>603a48f5-2c07-4a38-afb5-a7a5cb0f753b</Guid>
+            <Guid>aaaaaaaa-2c07-4a38-afb5-a7a5cb0f753b</Guid>
             <Status>ActiveInProduction</Status>
         </Application>
     </ObjectGroup>
@@ -32,7 +32,7 @@
     <ObjectGroup fileUri="DataFeeds.xml">
         <DataFeed>
             <Name>MyDatafeed</Name>
-            <Guid>aa5aabaa-bbd3-46bb-bb1e-a7a5cb0f753b</Guid>
+            <Guid>aaaaaaaa-bbd3-46bb-bb1e-a7a5cb0f753b</Guid>
             <Status>True</Status>
         </DataFeed>
     </ObjectGroup>
