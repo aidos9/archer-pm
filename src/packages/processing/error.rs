@@ -1,3 +1,5 @@
+use std::fmt;
+
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub enum ProcessingErrorType {
     ManifestDeserializationError,
@@ -8,7 +10,11 @@ pub enum ProcessingErrorType {
     JSONExportError,
     XMLEventDeserializeError,
     XMLAttributeDeserializeError,
+    XMLUnexpectedTagError,
     UTF8Error,
+    ManifestTagNotFound,
+    CannotConvertString(String),
+    XMLUnexpectedEOFError,
 }
 
 #[derive(Debug, Hash, PartialEq, Clone)]
@@ -40,6 +46,16 @@ impl ProcessingErrorType {
                 "XML Attribute Deserialize Error".to_string()
             }
             ProcessingErrorType::UTF8Error => "UTF-8 Error".to_string(),
+            ProcessingErrorType::ManifestTagNotFound => {
+                "Unexpectedly could not locate a tag in the manifest file.".to_string()
+            }
+            ProcessingErrorType::XMLUnexpectedTagError => "Unexpected XML tag Error".to_string(),
+            ProcessingErrorType::CannotConvertString(k) => {
+                format!("Could not convert the text in key '{}' to int", k)
+            }
+            ProcessingErrorType::XMLUnexpectedEOFError => {
+                "Unexpected end of XML file error".to_string()
+            }
         };
     }
 }
@@ -51,5 +67,11 @@ impl ProcessingError {
             debug_msg,
             public_msg,
         };
+    }
+}
+
+impl fmt::Display for ProcessingError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        return write!(f, "Processing Error: {}", self.public_msg);
     }
 }

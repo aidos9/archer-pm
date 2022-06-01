@@ -1,3 +1,4 @@
+use archer_package_manager::packages::processing::PackageObject;
 use clap::{Parser, Subcommand};
 
 #[derive(Debug, PartialEq, Parser)]
@@ -20,6 +21,20 @@ pub enum Command {
     Info {
         #[clap(subcommand)]
         operation: InformationOperation,
+        #[clap(
+            conflicts_with = "path",
+            short,
+            help = "The name of the package as stored in the management DB",
+            required_unless_present = "path"
+        )]
+        name: Option<String>,
+        #[clap(
+            conflicts_with = "name",
+            short,
+            help = "The path to the archer zip file",
+            required_unless_present = "name"
+        )]
+        path: Option<String>,
     },
 }
 
@@ -105,6 +120,33 @@ pub enum ModiferOperation {
         #[clap(short, long, help = "Show verbose output")]
         verbose: bool,
     },
+    #[clap(short_flag = 'b', about = "Bulk update a object in a package")]
+    BulkUpdate {
+        #[clap(arg_enum, value_name = "OBJECT")]
+        object: PackageObject,
+        #[clap(
+            help = "The keys to update, specify multiple using commas. (e.g. Description, Name)"
+        )]
+        key: String,
+        #[clap(
+            help = "The values to update the keys to, 1 value must be provided for each key. Some formatting arguments are supported, use '*' to insert the original field value or '{key_name}' to take the value of another key."
+        )]
+        value: String,
+        #[clap(short = 'v', long = "verbose", help = "Display verbose output")]
+        verbose: bool,
+        #[clap(
+            short = 'd',
+            long = "dry",
+            help = "Dry run, print changes without performing them"
+        )]
+        dry_run: bool,
+        #[clap(
+            short = 'f',
+            long = "filter",
+            help = "Specify a filter to filter the objects. A filter should use a '=' or '*' to either match exactly or check if the field contains. For example, '{Name}*Controls', would select any objects with a name field that contains the exact string 'Controls'."
+        )]
+        filter: Option<String>,
+    },
 }
 
 #[cfg(feature = "with-info")]
@@ -120,20 +162,11 @@ pub enum InformationOperation {
         detailed: bool,
         #[clap(short, help = "Prints processing information")]
         verbose: bool,
-        #[clap(
-            short,
-            long,
-            help = "Specify the package file to process",
-            required_unless_present = "name"
-        )]
-        path: Option<String>,
-        #[clap(short, long, help = "Specify a package name stored in the database")]
-        name: Option<String>,
     },
     #[clap(
         short_flag = 'a',
         name = "apps",
-        about = "Print information about a package"
+        about = "Print information about the applications in a package"
     )]
     Applications {
         #[clap(short = 'l', long = "list-apps", help = "Lists all applications")]
@@ -144,17 +177,18 @@ pub enum InformationOperation {
             help = "Lists all applications with advanced workflow"
         )]
         list_aw: bool,
-        #[clap(
-            short,
-            long,
-            help = "Specify the package file to process",
-            required_unless_present = "name"
-        )]
-        path: Option<String>,
-        #[clap(short, long, help = "Specify a package name stored in the database")]
-        name: Option<String>,
     },
-    Datafeeds,
+    #[clap(
+        short_flag = 'f',
+        name = "datafeeds",
+        about = "Print information about the datafeeds in a packages"
+    )]
+    Datafeeds {
+        #[clap(short = 'a', help = "Lists all datafeeds")]
+        list_all: bool,
+        #[clap(short = 'd', help = "Lists all datafeeds with details")]
+        list_detailed: bool,
+    },
     Notifications,
     Solutions,
     Dashboards,

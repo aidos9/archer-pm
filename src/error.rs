@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Copy, Clone, PartialEq, Hash, Debug)]
+#[derive(Clone, PartialEq, Hash, Debug)]
 pub enum APMErrorType {
     FileOpenError,
     FileReadError,
@@ -21,6 +21,8 @@ pub enum APMErrorType {
     WalkdirError,
     SymlinkFoundError,
     CannotProcessFileNameError,
+    ZIPArchiveFileFindError,
+    ProcessingError,
 }
 
 #[derive(Clone, PartialEq, Hash, Debug)]
@@ -59,6 +61,8 @@ impl fmt::Display for APMErrorType {
             APMErrorType::WalkdirError => "Walk Directory Error",
             APMErrorType::SymlinkFoundError => "Symlink Error",
             APMErrorType::CannotProcessFileNameError => "Cannot Process File Name Error",
+            APMErrorType::ZIPArchiveFileFindError => "ZIP Could not find a file Error",
+            APMErrorType::ProcessingError => "Processing Error",
         };
 
         return write!(f, "{}", s);

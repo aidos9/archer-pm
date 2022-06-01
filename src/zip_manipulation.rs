@@ -73,6 +73,11 @@ pub fn read_archive(path: &str) -> Result<ZipArchive<File>, APMError> {
         .map_err(|e| APMErrorType::ZIPArchiveOpenError.into_apm_error(e.to_string()))?);
 }
 
+pub fn read_archive_from_bytes(bytes: &[u8]) -> Result<ZipArchive<Cursor<&[u8]>>, APMError> {
+    return ZipArchive::new(Cursor::new(bytes))
+        .map_err(|e| APMErrorType::ZIPArchiveOpenError.into_apm_error(e.to_string()));
+}
+
 pub fn add_file_to_archive<A: Read + Seek + Write>(
     archive: &mut ZipWriter<A>,
     file: &str,
@@ -91,5 +96,20 @@ pub fn add_file_to_archive<A: Read + Seek + Write>(
     copy(&mut f, archive)
         .map_err(|e| APMErrorType::ZIPFileCopyError.into_apm_error(e.to_string()))?;
 
-    todo!();
+    return Ok(());
+}
+
+pub fn extract_file_from_archive<R: Read + Seek>(
+    archive: &mut ZipArchive<R>,
+    name: &str,
+) -> Result<Vec<u8>, APMError> {
+    let mut f = archive
+        .by_name(name)
+        .map_err(|e| APMErrorType::ZIPArchiveFileFindError.into_apm_error(e.to_string()))?;
+
+    let mut buf = Vec::new();
+    f.read_to_end(&mut buf)
+        .map_err(|e| APMErrorType::ZIPFileReadError.into_apm_error(e.to_string()))?;
+
+    return Ok(buf);
 }

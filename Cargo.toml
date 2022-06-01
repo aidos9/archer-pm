@@ -3,7 +3,6 @@ name = "archer_package_manager"
 version = "0.1.1"
 edition = "2021"
 
-
 [[bin]]
 name = "apm"
 path = "src/executable/main.rs"
@@ -27,8 +26,9 @@ sha2 = "0.10"
 base64 = "0.13"
 walkdir = "2.3"
 paste = "1.0"
+const_format = "0.2"
 clap = { version = "3.1", features = ["derive"], optional = true }
-fast-xml = { version = "0.22", features = ["serialize"], optional = true }
+fast-xml = { version = "0.23", features = ["serialize"], optional = true }
 serde_json = { version = "1.0", optional = true }
 serde = { version = "1.0", features = ["derive"], optional = true }
 toml = { version = "0.5", optional = true }

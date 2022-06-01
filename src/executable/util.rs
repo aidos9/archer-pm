@@ -1,4 +1,5 @@
 use std::io::{stdin, stdout, Write};
+use std::process::exit;
 
 pub fn y_n_question(question: &str) -> bool {
     let mut s = String::new();
@@ -12,4 +13,13 @@ pub fn y_n_question(question: &str) -> bool {
     }
 
     return s == "y";
+}
+
+pub fn package_path(name: Option<String>, path: Option<String>) -> String {
+    if name.is_some() || path.is_none() {
+        eprintln!("Error: Manager is not enabled.");
+        exit(1);
+    }
+
+    return path.unwrap();
 }

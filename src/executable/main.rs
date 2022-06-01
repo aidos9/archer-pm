@@ -19,6 +19,10 @@ fn main() {
         Command::Manager => eprintln!("Error: Manager is not enabled."),
         Command::Modifier { operation } => execute_modifier_op(operation),
         #[cfg(feature = "with-info")]
-        Command::Info { operation } => execute_informer_op(operation),
+        Command::Info {
+            operation,
+            name,
+            path,
+        } => execute_informer_op(operation, name, path),
     }
 }

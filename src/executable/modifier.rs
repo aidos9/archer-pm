@@ -160,6 +160,14 @@ fn execute_op(op: ModiferOperation) -> Result<(), APMError> {
             println!("Successfully created package");
             println!("Output: {}", dest);
         }
+        ModiferOperation::BulkUpdate {
+            object,
+            key,
+            value,
+            filter,
+            verbose,
+            dry_run,
+        } => todo!(),
     }
 
     return Ok(());
