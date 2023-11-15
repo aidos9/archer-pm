@@ -10,10 +10,11 @@ required-features = ["with-exe"]
 
 [features]
 default = ["all"]
-all = ["with-exe", "with-info", "all_exporters"]
+all = ["with-exe", "with-info", "all_exporters", "with-tui"]
 
 with-exe = ["clap"]
 with-info = ["with-exe", "fast-xml"]
+with-tui = ["crossterm"]
 
 all_exporters = ["json_exporter", "toml_exporter", "xml_exporter"]
 json_exporter = ["serde", "serde_json"]
@@ -32,3 +33,4 @@ fast-xml = { version = "0.23", features = ["serialize"], optional = true }
 serde_json = { version = "1.0", optional = true }
 serde = { version = "1.0", features = ["derive"], optional = true }
 toml = { version = "0.5", optional = true }
+crossterm = {version = "0.23", optional = true}

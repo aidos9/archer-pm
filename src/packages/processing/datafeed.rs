@@ -1,3 +1,4 @@
+use super::data_format::IntoDataFormat;
 use crate::packages::processing::XMLObject;
 
 use super::error::{ProcessingError, ProcessingErrorType};
@@ -23,59 +24,59 @@ struct PackageDataFeeds {
 #[derive(Debug, PartialEq, Hash, Clone, Serialize, Deserialize)]
 pub struct PackageDatafeed {
     #[serde(rename = "UpdateInformation")]
-    update_information: UpdateInformation,
+    pub update_information: UpdateInformation,
     #[serde(rename = "Active")]
-    active: bool,
+    pub active: bool,
     #[serde(rename = "Alias")]
-    alias: String,
+    pub alias: String,
     #[serde(rename = "ConfigurationXml")]
-    configuration: String,
+    pub configuration: String,
     #[serde(rename = "DataFeedType")]
-    datafeed_type: DatafeedType,
+    pub datafeed_type: DatafeedType,
     #[serde(rename = "Description")]
-    description: String,
+    pub description: String,
     #[serde(rename = "EnableHolding")]
-    enable_holding: bool,
+    pub enable_holding: bool,
     #[serde(rename = "GUID")]
-    guid: String,
+    pub guid: String,
     #[serde(rename = "Id")]
-    id: u64,
+    pub id: u64,
     #[serde(rename = "Name")]
-    name: String,
+    pub name: String,
     #[serde(rename = "ScheduleParentGuid")]
-    schedule_parent_guid: String,
+    pub schedule_parent_guid: String,
     #[serde(rename = "ScheduleParentName")]
-    schedule_parent_name: String,
+    pub schedule_parent_name: String,
     #[serde(rename = "ScheduledGuid")]
-    schedule_guid: String,
+    pub schedule_guid: String,
     #[serde(rename = "SelectedTarget")]
-    selected_target: u64,
+    pub selected_target: u64,
     #[serde(rename = "Status")]
-    status: String,
+    pub status: String,
 }
 
 #[derive(Debug, PartialEq, Hash, Clone, Serialize, Deserialize)]
 pub struct UpdateInformation {
     #[serde(rename = "CreateDate")]
-    creation_date: String,
+    pub creation_date: String,
     #[serde(rename = "CreateLogin")]
-    creation_login: u64,
+    pub creation_login: u64,
     #[serde(rename = "UpdateDate")]
-    update_date: String,
+    pub update_date: String,
     #[serde(rename = "UpdateLogin")]
-    update_login: u64,
+    pub update_login: u64,
 }
 
 #[derive(Debug, PartialEq, Hash, Clone, Serialize, Deserialize)]
 pub struct Users {
     #[serde(rename = "KeyValuePairOfintint")]
-    users: Vec<UserPair>,
+    pub users: Vec<UserPair>,
 }
 
 #[derive(Debug, PartialEq, Hash, Copy, Clone, Serialize, Deserialize)]
 pub struct UserPair {
-    key: u64,
-    value: u64,
+    pub key: u64,
+    pub value: u64,
 }
 
 define_package_string_enum! {
@@ -83,6 +84,16 @@ define_package_string_enum! {
         StandardService= "StandardServiceDataFeed"
     },
     other
+}
+
+impl PackageDatafeedsFile {
+    pub fn datafeeds(&self) -> &Vec<PackageDatafeed> {
+        return &self.datafeeds.datafeeds;
+    }
+
+    pub fn users(&self) -> &Vec<UserPair> {
+        return &self.users.users;
+    }
 }
 
 impl XMLObject for PackageDatafeedsFile {
@@ -94,6 +105,27 @@ impl XMLObject for PackageDatafeedsFile {
     fn from_xml_bufread<R: std::io::BufRead>(reader: R) -> Result<Self, ProcessingError> {
         return fast_xml::de::from_reader(reader)
             .map_err(|e| ProcessingErrorType::XMLEventDeserializeError.into_error(e.to_string()));
+    }
+}
+
+impl IntoDataFormat for PackageDatafeedsFile {
+    type Error = ProcessingError;
+
+    fn into_xml_string(&self) -> Result<String, Self::Error> {
+        return fast_xml::se::to_string(self)
+            .map_err(|e| ProcessingErrorType::XMLExportError.into_error(e.to_string()));
+    }
+
+    #[cfg(feature = "json_exporter")]
+    fn into_json_string(&self) -> Result<String, Self::Error> {
+        return serde_json::to_string(self)
+            .map_err(|e| ProcessingErrorType::JSONExportError.into_error(e.to_string()));
+    }
+
+    #[cfg(feature = "toml_exporter")]
+    fn into_toml_string(&self) -> Result<String, Self::Error> {
+        return toml::to_string(self)
+            .map_err(|e| ProcessingErrorType::TOMLExportError.into_error(e.to_string()));
     }
 }
 

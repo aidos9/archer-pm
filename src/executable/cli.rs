@@ -1,5 +1,5 @@
 use archer_package_manager::packages::processing::PackageObject;
-use clap::{Parser, Subcommand};
+use clap::{ArgEnum, Parser, Subcommand};
 
 #[derive(Debug, PartialEq, Parser)]
 pub struct CLIArgs {
@@ -36,6 +36,17 @@ pub enum Command {
         )]
         path: Option<String>,
     },
+}
+
+#[derive(ArgEnum, PartialEq, Debug, Hash, Clone, Copy)]
+pub enum ExportDataFormat {
+    Readable,
+    #[cfg(feature = "json_exporter")]
+    JSON,
+    #[cfg(feature = "xml_exporter")]
+    XML,
+    #[cfg(feature = "toml_exporter")]
+    TOML,
 }
 
 #[derive(Debug, PartialEq, Subcommand)]
@@ -160,8 +171,6 @@ pub enum InformationOperation {
     Overview {
         #[clap(short, help = "Lists package contents in increased detail")]
         detailed: bool,
-        #[clap(short, help = "Prints processing information")]
-        verbose: bool,
     },
     #[clap(
         short_flag = 'a',
@@ -179,7 +188,7 @@ pub enum InformationOperation {
         list_aw: bool,
     },
     #[clap(
-        short_flag = 'f',
+        short_flag = 'd',
         name = "datafeeds",
         about = "Print information about the datafeeds in a packages"
     )]
@@ -188,6 +197,8 @@ pub enum InformationOperation {
         list_all: bool,
         #[clap(short = 'd', help = "Lists all datafeeds with details")]
         list_detailed: bool,
+        #[clap(arg_enum, short, help = "Specify the data format", default_value_t)]
+        format: ExportDataFormat,
     },
     Notifications,
     Solutions,
@@ -195,4 +206,10 @@ pub enum InformationOperation {
     Workspaces,
     DataDrivenEvents,
     Levels,
+}
+
+impl Default for ExportDataFormat {
+    fn default() -> Self {
+        return Self::Readable;
+    }
 }

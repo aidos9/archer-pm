@@ -15,6 +15,8 @@ pub enum ProcessingErrorType {
     ManifestTagNotFound,
     CannotConvertString(String),
     XMLUnexpectedEOFError,
+    XMLExportError,
+    TOMLExportError,
 }
 
 #[derive(Debug, Hash, PartialEq, Clone)]
@@ -56,6 +58,8 @@ impl ProcessingErrorType {
             ProcessingErrorType::XMLUnexpectedEOFError => {
                 "Unexpected end of XML file error".to_string()
             }
+            ProcessingErrorType::XMLExportError => "XML Export Error".to_string(),
+            ProcessingErrorType::TOMLExportError => "TOML Export Error".to_string(),
         };
     }
 }

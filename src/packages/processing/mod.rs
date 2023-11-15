@@ -1,3 +1,4 @@
+mod data_format;
 mod datafeed;
 mod error;
 mod manifest;

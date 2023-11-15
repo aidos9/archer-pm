@@ -103,6 +103,14 @@ impl LoadedPackage {
 
         return Ok(());
     }
+
+    pub fn manifest(&self) -> &Manifest {
+        return &self.manifest;
+    }
+
+    pub fn datafeeds(&self) -> Option<&PackageDatafeedsFile> {
+        return self.datafeeds.as_ref();
+    }
 }
 
 #[cfg(test)]

@@ -75,6 +75,12 @@ macro_rules! define_package_string_enum {
             }
         }
 
+        impl std::fmt::Display for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                return write!(f, "{}", self.as_str());
+            }
+        }
+
         paste::paste! {
             impl<'de> serde::Deserialize<'de> for $name {
                 fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>

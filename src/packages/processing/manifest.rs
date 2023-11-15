@@ -10,17 +10,17 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 pub struct Manifest {
     #[serde(rename = "PackageName")]
-    package_name: String,
+    pub package_name: String,
     #[serde(rename = "PackageGuid")]
-    package_guid: String,
+    pub package_guid: String,
     #[serde(rename = "PackageVersion")]
-    package_version: String,
+    pub package_version: String,
     #[serde(rename = "PackageProvider")]
-    package_provider: String,
+    pub package_provider: String,
     #[serde(rename = "PackageDescription")]
-    package_description: String,
+    pub package_description: String,
     #[serde(rename = "PackageDate")]
-    package_date: String,
+    pub package_date: String,
     #[serde(rename = "ObjectGroup", default)]
     object_groups: Vec<ObjectGroup>,
 }
@@ -392,12 +392,6 @@ impl Default for ManifestObject {
             status: Default::default(),
             additional_pairs: None,
         };
-    }
-}
-
-impl fmt::Display for ManifestObjectTag {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        return write!(f, "{}", self.as_str());
     }
 }
 

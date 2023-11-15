@@ -2,6 +2,7 @@ mod cli;
 #[cfg(feature = "with-info")]
 mod informer;
 mod modifier;
+mod tui;
 mod util;
 
 use clap::StructOpt;
